@@ -1,0 +1,162 @@
+<html>
+
+<head>
+    <title> new app </title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet">
+</head>
+
+<body>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+
+
+    <h2> A Simple ToDo List App </h2>
+    <div><label>Task to complete</label>
+        <input id="noteText" type="text" name="newtask" placeholder="add new task">
+        <button id="addNote"> Add Note </button>
+        <!-- <h2> Added Task </h2> -->
+        <!-- <button formaction="/removetask" type="submit" onclick="click()"> Remove </button> -->
+    </div>
+
+
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th colspan="3">Notes</th>
+            </tr>
+        </thead>
+        <tbody id='notes'>
+
+        </tbody>
+        </table>
+    
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-database.js"></script>
+
+    <script>
+console.log("something");
+// Your web app's Firebase configuration
+var firebaseConfig = {
+    apiKey: "AIzaSyAkNPXx9qZrQ1PfjXrVi7rvCnxv4GDO6-w",
+    authDomain: "to-do-app-b33d9.firebaseapp.com",
+    databaseURL: "https://to-do-app-b33d9.firebaseio.com",
+    projectId: "to-do-app-b33d9",
+    storageBucket: "to-do-app-b33d9.appspot.com",
+    messagingSenderId: "145880012222",
+    appId: "1:145880012222:web:8738cfdef0789ab94355ef",
+    measurementId: "G-BS52XJXGBQ"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+console.log(firebase);
+
+function addNote() {
+    var noteMsg = document.getElementById('noteText').value;
+    if (noteMsg) {
+        var note = firebase.database().ref('notes').push();
+        var messageObj = {
+            msg: noteMsg
+        };
+        console.log(note.key);
+        note.set(messageObj);
+    }
+}
+
+function deleteNote(event) {
+    console.log('deleting the note');
+    firebase.database().ref('notes/' + event.target.dataset.key).remove();
+}
+
+function saveNote(event){
+    var message=document.getElementById('text-'+event.target.dataset.key).value;
+    firebase.database().ref('notes/' + event.target.dataset.key).update({
+        msg:message
+    });
+}
+
+// function showInitData() {
+//     firebase.database().ref('notes').once('value').then(function(res) {
+//         var data = res.val();
+//         console.log(data);
+//         notes = Object.keys(data);
+//         notes.forEach(function(noteKey) {
+//             console.log('note is  ', data[noteKey]);
+//             insertRow(data[noteKey], noteKey);
+//         });
+//     });
+// }
+
+function insertRow(rowData, noteKey) {
+    var notesTable = document.getElementById('notes');
+    var newRow = notesTable.insertRow();
+
+    var textNode = document.createElement("input");
+        textNode.setAttribute("type", "text");
+        textNode.id='text-'+noteKey;
+        textNode.value=rowData.msg;
+    newRow.insertCell().appendChild(textNode);
+    newRow.id = noteKey;
+    console.log('row index is', newRow.rowIndex);
+
+    var saveButton = document.createElement('button');
+    saveButton.innerText = 'Update';
+    saveButton.dataset.key = noteKey;
+    newRow.insertCell().appendChild(saveButton);
+    saveButton.addEventListener('click',saveNote)
+
+    var deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Delete';
+    deleteButton.dataset.key = noteKey;
+    deleteButton.addEventListener('click', deleteNote);
+    newRow.insertCell().appendChild(deleteButton)
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    //showInitData();
+    document.getElementById('addNote').addEventListener('click', addNote);
+    var notesRef = firebase.database().ref('notes');
+    notesRef.on('child_added', function(data) {
+        console.log('added', data);
+        insertRow(data.val(), data.key);
+    });
+    notesRef.on('child_removed', function(data) {
+        console.log('removed', data);
+        var row = document.getElementById(data.key);
+        row.parentElement.removeChild(row);
+    });
+    notesRef.on('child_changed', function() {
+        window.alert('Note Updated');
+    });
+});
+
+
+
+
+
+//         function click1()
+//          {
+//             console.log("ajbdjhqgdgqydgeq");
+//             console.log(firebase);
+//             var text = document.getElementById('text');
+//             var button = document.getElementById('button');
+//             var val = text.value;
+//             window.alert(val);
+//             var database = firebase.database();
+//             var firebaseRef = database.ref("/Users");
+//             // firebaseRef.set(val);
+//             firebaseRef.child(val).set(val);
+//             //  var ref = db.ref("server/saving-data/fireblog/posts");
+//             console.log(val);
+// // Attach an asynchronous callback to read the data at our posts reference
+// database.ref("/Users/" + val).on("value", function(snapshot) {
+//   console.log(snapshot.val());
+// }, function (errorObject) {
+//   console.log(val, errorObject.code);
+// });
+
+        
+       // }
+    </script>
+</body>
+
+</html>
